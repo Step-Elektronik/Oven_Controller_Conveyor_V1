@@ -1,0 +1,8 @@
+../Core/Src/sht40.c:31:9:sht4x_Init	16	static
+../Core/Src/sht40.c:68:9:i2c_read	32	static
+../Core/Src/sht40.c:158:6:sht4x_setMode	16	static
+../Core/Src/sht40.c:163:9:sht4xGetEvent	48	static
+../Core/Src/sht40.c:199:9:sht4xGetHeat	32	static
+../Core/Src/sht40.c:209:6:errorCheckProcess	8	static
+../Core/Src/sht40.c:242:6:softReset	8	static
+../Core/Src/sht40.c:246:9:crc8	32	static

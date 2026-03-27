@@ -1,0 +1,10 @@
+../Core/Src/Temperature_Process.c:44:5:calculate_termocouple	19
+../Core/Src/Temperature_Process.c:104:5:calculate_mcp9700	1
+../Core/Src/Temperature_Process.c:114:10:calculate_vref	1
+../Core/Src/Temperature_Process.c:126:19:adc_Init	3
+../Core/Src/Temperature_Process.c:149:6:avgAdcProcess	5
+../Core/Src/Temperature_Process.c:184:7:ConvertValueforKType	3
+../Core/Src/Temperature_Process.c:200:5:calculateThermocouple_K	1
+../Core/Src/Temperature_Process.c:218:7:ConvertValueforJType	3
+../Core/Src/Temperature_Process.c:233:5:calculateThermocouple_J	1
+../Core/Src/Temperature_Process.c:253:6:calculate_temperature	6

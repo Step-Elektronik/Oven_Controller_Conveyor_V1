@@ -1,0 +1,5 @@
+../Core/Src/TMP112.c:11:19:TMP112_Init	16	static
+../Core/Src/TMP112.c:25:19:TMP112_ReadTemperature	40	static
+../Core/Src/TMP112.c:48:19:TMP112_SetResolution	40	static
+../Core/Src/TMP112.c:69:19:TMP112_EnableShutdownMode	40	static
+../Core/Src/TMP112.c:91:19:TMP112_TriggerOneShot	40	static

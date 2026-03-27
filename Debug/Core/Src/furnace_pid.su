@@ -1,0 +1,5 @@
+../Core/Src/furnace_pid.c:77:6:Furnace_Init	56	static
+../Core/Src/furnace_pid.c:146:6:Furnace_Control_1s	32	static
+../Core/Src/furnace_pid.c:255:13:Set_Heater_DAC	16	static
+../Core/Src/furnace_pid.c:260:6:manual_pwm_update	16	static
+../Core/Src/furnace_pid.c:279:7:CalculateSoftThreshold	48	static

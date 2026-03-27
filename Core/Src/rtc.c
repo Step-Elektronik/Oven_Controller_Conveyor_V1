@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2026 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -21,7 +21,125 @@
 #include "rtc.h"
 
 /* USER CODE BEGIN 0 */
+#include "SEGGER_RTT.h"
 
+// Ayların gün sayısı (Şubat ayı için artık yıl kontrolü yapılır)
+const uint8_t daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+// Artık yıl kontrolü
+uint8_t isLeapYear(uint16_t year) {
+    return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0));
+}
+
+typedef struct {
+    uint32_t RemainingMinutes;
+    uint32_t RemainingSeconds;
+} CountdownTimer;
+
+// İstenilen saniye sonrasını hesaplayan fonksiyon
+void CalculateFutureTime(RTC_DateTypeDef *currentDate, RTC_TimeTypeDef *currentTime,
+                         RTC_DateTypeDef *futureDate, RTC_TimeTypeDef *futureTime,
+                         uint32_t offsetSeconds) {
+    // Geçerli tarih ve saati kopyala
+    *futureDate = *currentDate;
+    *futureTime = *currentTime;
+
+    // Toplam saniyeyi hesapla
+    uint32_t totalSeconds = futureTime->Seconds + offsetSeconds;
+
+    // Saniyeleri dakikaya dönüştür
+    futureTime->Seconds = totalSeconds % 60;
+    uint32_t totalMinutes = futureTime->Minutes + (totalSeconds / 60);
+
+    // Dakikaları saate dönüştür
+    futureTime->Minutes = totalMinutes % 60;
+    uint32_t totalHours = futureTime->Hours + (totalMinutes / 60);
+
+    // Saatleri güne dönüştür
+    futureTime->Hours = totalHours % 24;
+    uint32_t totalDays = totalHours / 24;
+
+    // Tarihi güncellemeye başla
+    while (totalDays > 0) {
+        uint8_t maxDays = daysInMonth[futureDate->Month - 1];
+
+        // Şubat için artık yıl kontrolü
+        if (futureDate->Month == 2 && isLeapYear(2000 + futureDate->Year)) {
+            maxDays = 29;
+        }
+
+        if (futureDate->Date + totalDays > maxDays) {
+            totalDays -= (maxDays - futureDate->Date + 1);
+            futureDate->Date = 1;
+            futureDate->Month++;
+
+            // Ay taşması (Aralık'tan Ocak'a geçiş)
+            if (futureDate->Month > 12) {
+                futureDate->Month = 1;
+                futureDate->Year++;
+            }
+        } else {
+            futureDate->Date += totalDays;
+            totalDays = 0;
+        }
+    }
+}
+
+
+void RTC_SetDateTime(uint8_t hour, uint8_t minute, uint8_t second, uint8_t day, uint8_t month, uint16_t year) {
+
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+
+    // Saat ayarla
+    sTime.Hours 	= hour;
+    sTime.Minutes 	= minute;
+    sTime.Seconds 	= second;
+
+
+    if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK) {
+        // Hata durumunda buraya gelir
+        Error_Handler();
+    }
+
+    // Tarih ayarla
+    sDate.Month 	= month;                	// Ay
+    sDate.Date 		= day;                   	// Gün
+    sDate.Year 		= year;           			// Yıl (örneğin 2025 için 25)
+
+    if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK) {
+        // Hata durumunda buraya gelir
+        Error_Handler();
+    }
+}
+
+
+void RTC_GetDateTime(RTC_TimeTypeDef *Time, RTC_DateTypeDef	*Date)
+{
+
+    RTC_TimeTypeDef sTime = {0};
+    RTC_DateTypeDef sDate = {0};
+
+
+    //Saat bilgisi oku
+    HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+
+    // Tarih bilgisi oku
+    HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+
+    Time->Hours 	= sTime.Hours;
+    Time->Minutes 	= sTime.Minutes;
+    Time->Seconds	= sTime.Seconds;
+
+    Date->Date		= sDate.Date;
+    Date->Month		= sDate.Month;
+    Date->WeekDay	= sDate.WeekDay;
+    Date->Year		= sDate.Year;
+
+//    SEGGER_RTT_printf(0,"Saat: %02d:%02d:%02d\n", sTime.Hours, sTime.Minutes, sTime.Seconds);
+//    SEGGER_RTT_printf(0,"Tarih: %02d/%02d/20%02d  gun:%d\n", sDate.Date, sDate.Month, sDate.Year,sDate.WeekDay);
+
+}
 /* USER CODE END 0 */
 
 RTC_HandleTypeDef hrtc;

@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2026 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -26,7 +26,11 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-
+#include "USART_Process.h"
+#include "SEGGER_RTT.h"
+#include "DWIN_Process.h"
+#include "string.h"
+#include "InOut_Process.h"
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -41,12 +45,20 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
+extern uint8_t DWIN_rxBuffer[DWIN_rxBufferSize];
+extern uint8_t main_DWIN_rxBuffer[DWIN_rxBufferSize];
+extern uint8_t ESP32_rxBuffer[ESP32_RX_BUFFER_SIZE];
+extern uint8_t main_ESP32_rxBuffer[ESP32_RX_BUFFER_SIZE];
 
+extern usartInfo DWIN;
+extern usartInfo ESP32;
+extern tickCounter counterTick;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
-
+void avgAdcProcess(void);
+void manual_pwm_update(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -89,7 +101,9 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
+	SEGGER_RTT_printf(0,"HardFault HANDLER !!! \r\n");
+	//HAL_Delay(0);
+	NVIC_SystemReset();
   /* USER CODE END HardFault_IRQn 0 */
   while (1)
   {
@@ -192,7 +206,12 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
+  avgAdcProcess();
+  PWM_SmoothTask_1ms();
+  manual_pwm_update();
 
+  if(counterTick.buharHazir < 100)
+	  counterTick.buharHazir++;
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -270,7 +289,13 @@ void EXTI9_5_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_7);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+  if(HAL_GPIO_ReadPin(INPUT_AC_2) == 1)
+  {
+	  counterTick.input_AC_2++;
 
+	  if(counterTick.input_AC_2 > 100)
+		  counterTick.input_AC_2 = 0;
+  }
   /* USER CODE END EXTI9_5_IRQn 1 */
 }
 
@@ -284,7 +309,21 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
+	if(__HAL_UART_GET_FLAG(&huart1, UART_FLAG_IDLE))
+	{
 
+		__HAL_UART_CLEAR_IDLEFLAG(&huart1);
+		HAL_UART_DMAStop(&huart1);
+
+		memcpy(ESP32_rxBuffer,main_ESP32_rxBuffer,ESP32_RX_BUFFER_SIZE);
+
+		HAL_UART_Receive_DMA(&huart1, main_ESP32_rxBuffer, ESP32_RX_BUFFER_SIZE);
+
+		ESP32.rxDoneFlag = 1;
+
+		memset(main_ESP32_rxBuffer,0,sizeof(main_ESP32_rxBuffer));
+
+	}
   /* USER CODE END USART1_IRQn 1 */
 }
 
@@ -298,7 +337,20 @@ void USART3_IRQHandler(void)
   /* USER CODE END USART3_IRQn 0 */
   HAL_UART_IRQHandler(&huart3);
   /* USER CODE BEGIN USART3_IRQn 1 */
+	if(__HAL_UART_GET_FLAG(&huart3, UART_FLAG_IDLE))
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(&huart3);
+		HAL_UART_DMAStop(&huart3);
 
+		memcpy(DWIN_rxBuffer,main_DWIN_rxBuffer,DWIN_rxBufferSize);
+
+		HAL_UART_Receive_DMA(&huart3, main_DWIN_rxBuffer, DWIN_rxBufferSize);
+
+		DWIN.rxDoneFlag = 1;
+
+		memset(main_DWIN_rxBuffer,0,sizeof(main_DWIN_rxBuffer));
+
+	}
   /* USER CODE END USART3_IRQn 1 */
 }
 

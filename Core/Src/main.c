@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2026 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -30,6 +30,18 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "math.h"
+#include "SEGGER_RTT.h"
+#include "string.h"
+#include "stdio.h"
+#include "DWIN_Process.h"
+#include "Temperature_Process.h"
+#include "InOut_Process.h"
+#include "USART_Process.h"
+#include "EEPROM_Process.h"
+//#include "sht40.h"
+//#include "hdc1080.h"
+#include "TMP112.h"
 
 /* USER CODE END Includes */
 
@@ -40,7 +52,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+extern DMA_HandleTypeDef hdma_usart3_rx;
+extern DMA_HandleTypeDef hdma_usart1_rx;
+extern I2C_HandleTypeDef hi2c1;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -51,7 +65,13 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern uint16_t DWIN_version;
+extern usartInfo DWIN;
+extern usartInfo ESP32;
+extern uint32_t outputData;
+extern EEPROM_initResponse eepromStatus;
+extern TMP112 tmpSensor;
+//extern HDC1080 hdcSensor;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,6 +82,10 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+extern uint16_t registerTable[9000];
+
+
+
 
 /* USER CODE END 0 */
 
@@ -105,6 +129,94 @@ int main(void)
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 
+  ShiftRegister_SendData(0);
+  HAL_Delay(0);
+  SEGGER_RTT_ConfigUpBuffer(0,NULL, NULL, 0, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
+  HAL_Delay(0);
+  SEGGER_RTT_printf(0,"-------- SYSTEM START -------- \r\n");
+
+  PWM_SetFreqAndDuty(0, 50);
+
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
+  HAL_GPIO_WritePin(OE_PORT, OE_PIN, 1);
+
+	  for(int i=0;i<6;i++)
+	  {
+		  HAL_Delay(30);
+		  setOut(BUZZER, HIGH);
+		  HAL_Delay(30);
+		  setOut(BUZZER, LOW);
+
+		  HAL_GPIO_TogglePin(RUN_LED);
+	  }
+
+
+	  if(adc_Init() != HAL_OK)
+	  {
+		  SEGGER_RTT_printf(0,"ADC Error \r\n");
+		  Error_Handler();
+	  }
+
+	  if(HAL_I2C_IsDeviceReady(&hi2c1, EEPROM_BASE_ADDR << 1, 2, 100) != HAL_OK)
+	  {
+		  eepromStatus = EE_INIT_ERROR;
+		  SEGGER_RTT_printf(0,"EEPROM Error \r\n");
+	  }
+
+	  if(DWIN_SetUsartChannel(&huart3, USART3, &hdma_usart3_rx) != HAL_OK)
+	  {
+		  SEGGER_RTT_printf(0,"DWIN Set Usart Channel Error ! \r\n");
+		  Error_Handler();
+	  }
+
+//	  if(ESP32_SetUsartChannel(&huart1, USART1, &hdma_usart1_rx) != HAL_OK)
+//	  {
+//		  SEGGER_RTT_printf(0,"ESP32 Set Usart Channel Error ! \r\n");
+//		  Error_Handler();
+//	  }
+
+	  if(TMP112_Init(&tmpSensor, &hi2c1) == HAL_OK)
+	  {
+		  // 12-bit çözünürlük ayarla
+		  TMP112_SetResolution(&tmpSensor, TMP112_RESOLUTION_12_BIT);
+
+		  // Shutdown modunu etkinleştir
+		  //TMP112_EnableShutdownMode(&mySensor, 1);
+
+		  // Tek seferlik ölçüm başlat
+		  //TMP112_TriggerOneShot(&mySensor);
+	  }
+
+	  else
+	  {
+		  SEGGER_RTT_printf(0,"TMP112 Init ERROR ! \r\n");
+	  }
+
+	  memset(registerTable,0,sizeof(registerTable));
+
+	  HAL_Delay(2000);
+
+	  if(EEPROM_init(&hi2c1) != EE_INIT_OK)
+		  SEGGER_RTT_printf(0,"EEPROM Init Error ! \r\n");
+
+	  HAL_RTCEx_SetSecond_IT(&hrtc);
+
+	  setOut(Q_CONVEYOR_EN, 1);
+
+	  HAL_DAC_Start(&hdac, DAC_CHANNEL_1);
+	  HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+
+	  HAL_DAC_SetValue(&hdac,
+	                   DAC_CHANNEL_1,
+	                   DAC_ALIGN_12B_R,
+	                   0);
+	  HAL_DAC_SetValue(&hdac,
+	                   DAC_CHANNEL_2,
+	                   DAC_ALIGN_12B_R,
+	                   0);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,6 +226,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  DWIN_run();
+	  //Bluetooth_run();
+
   }
   /* USER CODE END 3 */
 }
@@ -184,6 +299,8 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
+	SEGGER_RTT_printf(0,"Error HANDLER !!! \r\n");
+	HAL_Delay(0);
   __disable_irq();
   while (1)
   {

@@ -1,0 +1,5 @@
+../Core/Src/TMP112.c:11:19:TMP112_Init	2
+../Core/Src/TMP112.c:25:19:TMP112_ReadTemperature	4
+../Core/Src/TMP112.c:48:19:TMP112_SetResolution	4
+../Core/Src/TMP112.c:69:19:TMP112_EnableShutdownMode	5
+../Core/Src/TMP112.c:91:19:TMP112_TriggerOneShot	4

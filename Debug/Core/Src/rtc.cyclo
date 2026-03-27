@@ -1,3 +1,7 @@
-../Core/Src/rtc.c:30:6:MX_RTC_Init	4
-../Core/Src/rtc.c:83:6:HAL_RTC_MspInit	2
-../Core/Src/rtc.c:106:6:HAL_RTC_MspDeInit	2
+../Core/Src/rtc.c:30:9:isLeapYear	4
+../Core/Src/rtc.c:40:6:CalculateFutureTime	6
+../Core/Src/rtc.c:89:6:RTC_SetDateTime	3
+../Core/Src/rtc.c:117:6:RTC_GetDateTime	1
+../Core/Src/rtc.c:148:6:MX_RTC_Init	4
+../Core/Src/rtc.c:201:6:HAL_RTC_MspInit	2
+../Core/Src/rtc.c:224:6:HAL_RTC_MspDeInit	2
