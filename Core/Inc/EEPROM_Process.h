@@ -19,7 +19,7 @@
 #define EEPROM_PAGE_LIMIT 65536   // 64 kB EEPROM
 #define EEPROM_MAX_READ_CHUNK 128 // I2C donanımı sınırı için güvenli parça boyutu
 
-#define EEPROM_TABLE_LEN	14
+#define EEPROM_TABLE_LEN	15
 
 typedef enum
 {

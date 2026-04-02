@@ -1,8 +1,8 @@
-../Core/Src/EEPROM_Process.c:41:22:AT24C512_WaitForReady	24	static
-../Core/Src/EEPROM_Process.c:58:22:EEPROM_Write	224	dynamic
-../Core/Src/EEPROM_Process.c:167:6:EEPROM_Read	40	static
-../Core/Src/EEPROM_Process.c:189:19:EEPROM_Read_Safe	32	static
-../Core/Src/EEPROM_Process.c:219:21:EEPROM_init	48	static
-../Core/Src/EEPROM_Process.c:315:21:EEPROM_Recete_DefaultWrite	2984	static
-../Core/Src/EEPROM_Process.c:378:6:EEPROM_Recete_Read	72	static
-../Core/Src/EEPROM_Process.c:404:21:EEPROM_OtomatikAcma_DefaultWrite	184	static
+../Core/Src/EEPROM_Process.c:42:22:AT24C512_WaitForReady	24	static
+../Core/Src/EEPROM_Process.c:59:22:EEPROM_Write	224	dynamic
+../Core/Src/EEPROM_Process.c:168:6:EEPROM_Read	40	static
+../Core/Src/EEPROM_Process.c:190:19:EEPROM_Read_Safe	32	static
+../Core/Src/EEPROM_Process.c:220:21:EEPROM_init	48	static
+../Core/Src/EEPROM_Process.c:317:21:EEPROM_Recete_DefaultWrite	2984	static
+../Core/Src/EEPROM_Process.c:380:6:EEPROM_Recete_Read	72	static
+../Core/Src/EEPROM_Process.c:406:21:EEPROM_OtomatikAcma_DefaultWrite	184	static

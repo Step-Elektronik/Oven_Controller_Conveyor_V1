@@ -31,7 +31,8 @@ uint16_t eepromAddrTable[EEPROM_TABLE_LEN] = 	{
 												DW_BRULOR_RST_PARAM_ADR,
 												DW_SICAKLIK_MAX_SET_PARAM_ADR,
 												DW_LOGO_PARAM_ADR,
-												DW_TERMOKUPL_TYPE_PARAM_ADR
+												DW_TERMOKUPL_TYPE_PARAM_ADR,
+												DW_FIRIN_GUC_TYPE_PARAM_ADR
 
 												};
 
@@ -267,6 +268,7 @@ EEPROM_initResponse EEPROM_init(I2C_HandleTypeDef *hi2c)
 		registerTable[DW_MOTOR_FREQ_ADR] 				= 105;
 		registerTable[DW_LOGO_PARAM_ADR] 				= 1;
 		registerTable[DW_TERMOKUPL_TYPE_PARAM_ADR]		= DW_K_TYPE_TERMOKUP_VAL;
+		registerTable[DW_FIRIN_GUC_TYPE_PARAM_ADR]		= 1;
 
 		uint8_t usageWrite = EEPROM_USAGE_CHECK_VAL;
 		EEPROM_Write(hi2c, EEPROM_USAGE_CHECK_ADDR, &usageWrite, 1);

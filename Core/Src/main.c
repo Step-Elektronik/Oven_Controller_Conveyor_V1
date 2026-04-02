@@ -228,6 +228,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  DWIN_run();
 	  //Bluetooth_run();
+	  //Test
 
   }
   /* USER CODE END 3 */

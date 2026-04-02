@@ -1069,7 +1069,6 @@ void DWIN_check(void)
 
 			if(DWIN_readRegister(version, VERSION_ADDR, sizeof(version)) == READ_OK)
 			{
-
 				dwin_check_counter = 0;
 
 				SEGGER_RTT_printf(0,"DWIN OK ! Version : %x%x\r\n",version[0],version[1]);
@@ -1548,6 +1547,7 @@ void DWIN_anaSayfa(void)
 
 		break;
 
+
 		case DW_TERMOKUPL_TYPE_PARAM_ADR:
 
 			registerTable[DW_TERMOKUPL_TYPE_PARAM_ADR] = data;
@@ -1581,10 +1581,20 @@ void DWIN_anaSayfa(void)
 
 				DWIN_writeRegiser((uint16_t[]){0x55aa,0x5aa5},0x0004,4);
 
-				HAL_Delay(10);
+				HAL_Delay(1000);
 
 				NVIC_SystemReset();
 			}
+
+		break;
+
+		case DW_FIRIN_GUC_TYPE_PARAM_ADR:
+
+			registerTable[DW_FIRIN_GUC_TYPE_PARAM_ADR] = data;
+
+			parse16BitTo8Bit(data, &data2[0], &data2[1]);
+
+			EEPROM_Write(&hi2c1, DW_FIRIN_GUC_TYPE_PARAM_ADR, data2, sizeof(data2));
 
 		break;
 

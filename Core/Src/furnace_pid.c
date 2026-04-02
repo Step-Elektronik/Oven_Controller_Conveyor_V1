@@ -205,23 +205,23 @@ void Furnace_Control_1s(void)
 				{
 
 					PID_SetTunings(&furnacePID, 10.0, 0.05, 0.0);
-					pid_output = 80;
+					pid_output = 90;
 				}
 
-				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 360)
-				{
-					PID_SetTunings(&furnacePID, 8.0, 0.05, 0.0);
-					pid_output = 70;
-				}
 				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 320)
 				{
-					PID_SetTunings(&furnacePID, 7.0, 0.05, 0.0);
-					pid_output = 60;
+					PID_SetTunings(&furnacePID, 9.0, 0.03, 0.0);
+					pid_output = 80;
+				}
+				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 250)
+				{
+					PID_SetTunings(&furnacePID, 8.0, 0.03, 0.0);
+					pid_output = 70;
 				}
 				else
 				{
-					PID_SetTunings(&furnacePID, 6.0, 0.05, 0.0);
-					pid_output = 50;
+					PID_SetTunings(&furnacePID, 7.0, 0.03, 0.0);
+					pid_output = 60;
 				}
 
 				tick_counter = 0;
