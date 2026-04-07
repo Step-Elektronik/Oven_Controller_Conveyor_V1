@@ -57,6 +57,8 @@ double PID_KD 	=	0.0;
 ───────────────────────────────────────────── */
 static void Set_Heater_DAC(uint32_t value);
 float CalculateSoftThreshold(float setTemp, float currentTemp);
+void type1_oven_heating_process(void);
+void type2_oven_heating_process(void);
 /* ─────────────────────────────────────────────
    Global Değişkenler
 ───────────────────────────────────────────── */
@@ -192,46 +194,14 @@ void Furnace_Control_1s(void)
     {
 		if(pid_active == 1)
 		{
-			if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
+			if(registerTable[DW_FIRIN_GUC_TYPE_PARAM_ADR] == 1)
 			{
-				if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 450)
-				{
+				type1_oven_heating_process();
 
-					PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
-					pid_output = 90;
-				}
-
-				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 400)
-				{
-
-					PID_SetTunings(&furnacePID, 10.0, 0.05, 0.0);
-					pid_output = 90;
-				}
-
-				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 320)
-				{
-					PID_SetTunings(&furnacePID, 9.0, 0.03, 0.0);
-					pid_output = 80;
-				}
-				else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 250)
-				{
-					PID_SetTunings(&furnacePID, 8.0, 0.03, 0.0);
-					pid_output = 70;
-				}
-				else
-				{
-					PID_SetTunings(&furnacePID, 7.0, 0.03, 0.0);
-					pid_output = 60;
-				}
-
-				tick_counter = 0;
-				furnacePID.OutputSum = 0;
 			}
-
 			else
 			{
-				tick_counter += 1000;
-				PID_Compute(&furnacePID, tick_counter);
+				type2_oven_heating_process();
 			}
 		}
     }
@@ -302,4 +272,119 @@ float CalculateSoftThreshold(float setTemp, float currentTemp)
     softThreshold = setTemp - (diff * k);
 
     return softThreshold;
+}
+
+void type1_oven_heating_process(void)
+{
+	if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
+	{
+		if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 460)
+		{
+
+			//PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
+			pid_output = 100;
+		}
+
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 430)
+		{
+
+			//PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
+			pid_output = 90;
+		}
+
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 370)
+		{
+
+			//PID_SetTunings(&furnacePID, 9.0, 0.05, 0.0);
+			pid_output = 80;
+		}
+
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 310)
+		{
+			//PID_SetTunings(&furnacePID, 8.0, 0.05, 0.0);
+			pid_output = 70;
+		}
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 220)
+		{
+			//PID_SetTunings(&furnacePID, 7.0, 0.05, 0.0);
+			pid_output = 60;
+		}
+		else
+		{
+			//PID_SetTunings(&furnacePID, 6.0, 0.05, 0.0);
+			pid_output = 50;
+		}
+
+		tick_counter = 0;
+		furnacePID.OutputSum = 0;
+	}
+
+	else
+	{
+
+		if(tick_counter == 0)
+		{
+			furnacePID.OutputSum = pid_output - 30;
+
+			if(pid_output == 100)
+				pid_output = 90;
+
+			PID_SetOutputLimits(&furnacePID, 20, pid_output + 10);
+			PID_SetTunings(&furnacePID, 5.0, 0.03, 0.0);
+
+
+
+		}
+
+
+		tick_counter += 1000;
+		PID_Compute(&furnacePID, tick_counter);
+	}
+}
+void type2_oven_heating_process(void)
+{
+
+	if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
+	{
+		if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 450)
+		{
+
+			PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
+			pid_output = 90;
+		}
+
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 400)
+		{
+
+			PID_SetTunings(&furnacePID, 10.0, 0.05, 0.0);
+			pid_output = 80;
+		}
+
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 360)
+		{
+			PID_SetTunings(&furnacePID, 8.0, 0.05, 0.0);
+			pid_output = 70;
+		}
+		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 320)
+		{
+			PID_SetTunings(&furnacePID, 7.0, 0.05, 0.0);
+			pid_output = 60;
+		}
+		else
+		{
+			PID_SetTunings(&furnacePID, 6.0, 0.05, 0.0);
+			pid_output = 50;
+		}
+
+		tick_counter = 0;
+		furnacePID.OutputSum = 0;
+	}
+
+	else
+	{
+
+		tick_counter += 1000;
+		PID_Compute(&furnacePID, tick_counter);
+	}
+
 }

@@ -52,6 +52,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 Oven_Controller_Conveyor_V1.list \
 
+OBJCOPY_HEX += \
+Oven_Controller_Conveyor_V1.hex \
+
 
 # All Target
 all: main-build
@@ -75,12 +78,17 @@ Oven_Controller_Conveyor_V1.list: $(EXECUTABLES) makefile objects.list $(OPTIONA
 	@echo 'Finished building: $@'
 	@echo ' '
 
+Oven_Controller_Conveyor_V1.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "Oven_Controller_Conveyor_V1.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) Oven_Controller_Conveyor_V1.elf Oven_Controller_Conveyor_V1.list Oven_Controller_Conveyor_V1.map default.size.stdout
+	-$(RM) Oven_Controller_Conveyor_V1.elf Oven_Controller_Conveyor_V1.hex Oven_Controller_Conveyor_V1.list Oven_Controller_Conveyor_V1.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

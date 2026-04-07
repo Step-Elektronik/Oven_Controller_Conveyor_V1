@@ -1,5 +1,7 @@
-../Core/Src/furnace_pid.c:77:6:Furnace_Init	6
-../Core/Src/furnace_pid.c:146:6:Furnace_Control_1s	14
-../Core/Src/furnace_pid.c:255:13:Set_Heater_DAC	1
-../Core/Src/furnace_pid.c:260:6:manual_pwm_update	6
-../Core/Src/furnace_pid.c:279:7:CalculateSoftThreshold	4
+../Core/Src/furnace_pid.c:79:6:Furnace_Init	6
+../Core/Src/furnace_pid.c:148:6:Furnace_Control_1s	10
+../Core/Src/furnace_pid.c:225:13:Set_Heater_DAC	1
+../Core/Src/furnace_pid.c:230:6:manual_pwm_update	6
+../Core/Src/furnace_pid.c:249:7:CalculateSoftThreshold	4
+../Core/Src/furnace_pid.c:277:6:type1_oven_heating_process	9
+../Core/Src/furnace_pid.c:344:6:type2_oven_heating_process	6

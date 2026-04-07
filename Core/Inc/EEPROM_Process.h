@@ -14,7 +14,7 @@
 #define EEPROM_PAGE_SIZE         	128    // EEPROM sayfa boyutu
 #define EEPROM_TIMEOUT_MS 			20
 #define EEPROM_USAGE_CHECK_ADDR 	0
-#define EEPROM_USAGE_CHECK_VAL		99
+#define EEPROM_USAGE_CHECK_VAL		98
 
 #define EEPROM_PAGE_LIMIT 65536   // 64 kB EEPROM
 #define EEPROM_MAX_READ_CHUNK 128 // I2C donanımı sınırı için güvenli parça boyutu
