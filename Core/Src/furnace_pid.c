@@ -55,7 +55,7 @@ double PID_KD 	=	0.0;
 /* ─────────────────────────────────────────────
    Forward Declaration
 ───────────────────────────────────────────── */
-static void Set_Heater_DAC(uint32_t value);
+void Set_Heater_DAC(uint32_t value);
 float CalculateSoftThreshold(float setTemp, float currentTemp);
 void type1_oven_heating_process(void);
 void type2_oven_heating_process(void);
@@ -108,9 +108,9 @@ void Furnace_Init(void)
 
 		break;
 
-		case DW_DOGALGAZ_FIRIN_TYPE_VAL:
+		case DW_DOGALGAZ_AO_FIRIN_TYPE_VAL:
 
-			DAC_MAX = 3500.0;
+			DAC_MAX = 1600.0;
 			DAC_MIN = 0.0;
 
 			PID_KP 	= 	40.0;
@@ -122,6 +122,7 @@ void Furnace_Init(void)
 		break;
 	}
     /* PID nesnesini yapılandır */
+
     PID(&furnacePID,
         &pid_input,          /* Giriş  : int*  (temp.TC3 buraya yazılacak) */
         &pid_output,         /* Çıkış  : double*           					*/
@@ -148,81 +149,98 @@ void Furnace_Init(void)
 void Furnace_Control_1s(void)
 {
 
-    /* 1. Set sıcaklığını register'dan oku (her döngüde güncellenir) */
-    pid_setpoint = (double)registerTable[DW_UST_SICAKLIK_SET_ADR];
-
-    /* 2. Mevcut sıcaklığı oku */
-    pid_input = temp.TC3;
-
-    /* 3. Soft-start eşiğini dinamik hesapla (%80 × set değeri) */
-
-    SEGGER_RTT_printf(0,"sicaklik : %d pid output :%d soft_threshold :  %d\r\n",temp.TC3, (uint32_t)pid_output, (uint32_t)soft_threshold);
-
-    /* 4. Soft-start kontrolü */
-    if (!pid_active)
-    {
-        if ((double)pid_input >= soft_threshold)
-        {
-            /*
-             * Eşiğe ulaşıldı → Hemen fren uygula.
-             * pid_output DAC_MIN'e çekiliyor ki PID_Init() OutputSum'u
-             * oradan başlatsın. Fırının kendi ataletini hesaba katarak
-             * PID sıfırdan yukarı doğru kontrol eder, overshoot engellenir.
-             */
-
-			pid_output = DAC_MIN;
-			PID_SetMode(&furnacePID, _PID_MODE_AUTOMATIC);
-			pid_active = 1;
-
-        }
-        else
-        {
-            /* Henüz eşiğe gelmedik → tam güç */
-            pid_output = DAC_MAX;
-
-            if((registerTable[DW_FIRIN_TYPE_ADR] == DW_LPG_FIRIN_TYPE_VAL)||(registerTable[DW_FIRIN_TYPE_ADR] == DW_DOGALGAZ_FIRIN_TYPE_VAL))
-            	Set_Heater_DAC((uint32_t)pid_output);
-
-            return;
-        }
-    }
-
-
-
-
-    if(registerTable[DW_FIRIN_TYPE_ADR] == DW_ELEKTRIKLI_FIRIN_TYPE_VAL)
-    {
-		if(pid_active == 1)
+	if(registerTable[DW_FIRIN_TYPE_ADR] == DW_DOGALGAZ_DO_FIRIN_TYPE_VAL)
+	{
+		if((temp.TC3 < (registerTable[DW_UST_SICAKLIK_SET_ADR] - 4))&&(CheckBit(K16) == 0))
 		{
-			if(registerTable[DW_FIRIN_GUC_TYPE_PARAM_ADR] == 1)
+			setOut(K16, 1);
+		}
+
+		if((temp.TC3 > registerTable[DW_UST_SICAKLIK_SET_ADR])&&(CheckBit(K16) == 1))
+		{
+			setOut(K16, 0);
+		}
+	}
+	else
+	{
+
+		/* 1. Set sıcaklığını register'dan oku (her döngüde güncellenir) */
+		pid_setpoint = (double)registerTable[DW_UST_SICAKLIK_SET_ADR];
+
+		/* 2. Mevcut sıcaklığı oku */
+		pid_input = temp.TC3;
+
+		/* 3. Soft-start eşiğini dinamik hesapla (%80 × set değeri) */
+
+		SEGGER_RTT_printf(0,"sicaklik : %d pid output :%d soft_threshold :  %d\r\n",temp.TC3, (uint32_t)pid_output, (uint32_t)soft_threshold);
+
+		/* 4. Soft-start kontrolü */
+		if (!pid_active)
+		{
+			if ((double)pid_input >= soft_threshold)
 			{
-				type1_oven_heating_process();
+				/*
+				 * Eşiğe ulaşıldı → Hemen fren uygula.
+				 * pid_output DAC_MIN'e çekiliyor ki PID_Init() OutputSum'u
+				 * oradan başlatsın. Fırının kendi ataletini hesaba katarak
+				 * PID sıfırdan yukarı doğru kontrol eder, overshoot engellenir.
+				 */
+
+				pid_output = DAC_MIN;
+				PID_SetMode(&furnacePID, _PID_MODE_AUTOMATIC);
+				pid_active = 1;
 
 			}
 			else
 			{
-				type2_oven_heating_process();
+				/* Henüz eşiğe gelmedik → tam güç */
+				pid_output = DAC_MAX;
+
+				if((registerTable[DW_FIRIN_TYPE_ADR] == DW_LPG_FIRIN_TYPE_VAL)||(registerTable[DW_FIRIN_TYPE_ADR] == DW_DOGALGAZ_AO_FIRIN_TYPE_VAL))
+					Set_Heater_DAC((uint32_t)pid_output);
+
+				return;
 			}
 		}
-    }
 
-    else
-    {
-    	/* 5. PID hesapla */
-    	tick_counter += 1000;
-    	PID_Compute(&furnacePID, tick_counter);
-    }
 
-    /* 6. Çıkışı ısıtıcıya uygula */
-    if((registerTable[DW_FIRIN_TYPE_ADR] == DW_LPG_FIRIN_TYPE_VAL)||(registerTable[DW_FIRIN_TYPE_ADR] == DW_DOGALGAZ_FIRIN_TYPE_VAL))
-    	Set_Heater_DAC((uint32_t)pid_output);
+
+
+		if(registerTable[DW_FIRIN_TYPE_ADR] == DW_ELEKTRIKLI_FIRIN_TYPE_VAL)
+		{
+			if(pid_active == 1)
+			{
+				if(registerTable[DW_FIRIN_GUC_TYPE_PARAM_ADR] == 1)
+				{
+					type1_oven_heating_process();
+
+				}
+				else
+				{
+					type2_oven_heating_process();
+				}
+			}
+		}
+
+		else
+		{
+			/* 5. PID hesapla */
+			tick_counter += 1000;
+			PID_Compute(&furnacePID, tick_counter);
+		}
+
+		/* 6. Çıkışı ısıtıcıya uygula */
+		if((registerTable[DW_FIRIN_TYPE_ADR] == DW_LPG_FIRIN_TYPE_VAL)||(registerTable[DW_FIRIN_TYPE_ADR] == DW_DOGALGAZ_AO_FIRIN_TYPE_VAL))
+			Set_Heater_DAC((uint32_t)pid_output);
+
+	}
 }
 
 /* ─────────────────────────────────────────────
    Yardımcı: Isıtıcı DAC yazma
    Kanal ve hizalama ayarını donanımınıza göre düzenleyin
 ───────────────────────────────────────────── */
-static void Set_Heater_DAC(uint32_t value)
+void Set_Heater_DAC(uint32_t value)
 {
     HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, value);
 }
@@ -274,46 +292,26 @@ float CalculateSoftThreshold(float setTemp, float currentTemp)
     return softThreshold;
 }
 
+double type1_outputCalculate(uint16_t setTemp)
+{
+    double output;
+
+    // lineer yaklaşık (220 -> 60, 460 -> 100)
+    output = 60.0 + ( (double)(setTemp - 220) * (40.0 / (460.0 - 220.0)) );
+
+    // sınırlandırma (clamp)
+    if(output > 100.0) output = 100.0;
+    if(output < 50.0)  output = 50.0;
+
+    return output;
+}
+
 void type1_oven_heating_process(void)
 {
 	if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
 	{
-		if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 460)
-		{
 
-			//PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
-			pid_output = 100;
-		}
-
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 430)
-		{
-
-			//PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
-			pid_output = 90;
-		}
-
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 370)
-		{
-
-			//PID_SetTunings(&furnacePID, 9.0, 0.05, 0.0);
-			pid_output = 80;
-		}
-
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 310)
-		{
-			//PID_SetTunings(&furnacePID, 8.0, 0.05, 0.0);
-			pid_output = 70;
-		}
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 220)
-		{
-			//PID_SetTunings(&furnacePID, 7.0, 0.05, 0.0);
-			pid_output = 60;
-		}
-		else
-		{
-			//PID_SetTunings(&furnacePID, 6.0, 0.05, 0.0);
-			pid_output = 50;
-		}
+		pid_output = 100;//(uint16_t)type1_outputCalculate(registerTable[DW_UST_SICAKLIK_SET_ADR]);//100
 
 		tick_counter = 0;
 		furnacePID.OutputSum = 0;
@@ -332,8 +330,6 @@ void type1_oven_heating_process(void)
 			PID_SetOutputLimits(&furnacePID, 20, pid_output + 10);
 			PID_SetTunings(&furnacePID, 5.0, 0.03, 0.0);
 
-
-
 		}
 
 
@@ -341,40 +337,28 @@ void type1_oven_heating_process(void)
 		PID_Compute(&furnacePID, tick_counter);
 	}
 }
+
+double type2_outputCalculate(uint16_t setTemp)
+{
+    double output;
+
+    // 320 -> 60, 450 -> 90
+    output = 60.0 + ((double)(setTemp - 320) * (30.0 / (450.0 - 320.0)));
+
+    // clamp
+    if(output > 100.0) output = 100.0;
+    if(output < 50.0) output = 50.0;
+
+    return output;
+}
+
 void type2_oven_heating_process(void)
 {
 
 	if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
 	{
-		if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 450)
-		{
 
-			PID_SetTunings(&furnacePID, 12.0, 0.05, 0.0);
-			pid_output = 90;
-		}
-
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 400)
-		{
-
-			PID_SetTunings(&furnacePID, 10.0, 0.05, 0.0);
-			pid_output = 80;
-		}
-
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 360)
-		{
-			PID_SetTunings(&furnacePID, 8.0, 0.05, 0.0);
-			pid_output = 70;
-		}
-		else if(registerTable[DW_UST_SICAKLIK_SET_ADR] > 320)
-		{
-			PID_SetTunings(&furnacePID, 7.0, 0.05, 0.0);
-			pid_output = 60;
-		}
-		else
-		{
-			PID_SetTunings(&furnacePID, 6.0, 0.05, 0.0);
-			pid_output = 50;
-		}
+		pid_output = (uint16_t)type2_outputCalculate(registerTable[DW_UST_SICAKLIK_SET_ADR]);
 
 		tick_counter = 0;
 		furnacePID.OutputSum = 0;
@@ -382,6 +366,18 @@ void type2_oven_heating_process(void)
 
 	else
 	{
+
+		if(tick_counter == 0)
+		{
+			furnacePID.OutputSum = pid_output - 30;
+
+			if(pid_output == 100)
+				pid_output = 90;
+
+			PID_SetOutputLimits(&furnacePID, 20, pid_output + 10);
+			PID_SetTunings(&furnacePID, 5.0, 0.03, 0.0);
+
+		}
 
 		tick_counter += 1000;
 		PID_Compute(&furnacePID, tick_counter);

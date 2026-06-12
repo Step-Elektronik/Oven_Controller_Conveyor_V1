@@ -291,6 +291,8 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
   if(HAL_GPIO_ReadPin(INPUT_AC_2) == 1)
   {
+	  //counterTick.brulorResetRelayDelay = HAL_GetTick();
+
 	  counterTick.input_AC_2++;
 
 	  if(counterTick.input_AC_2 > 100)

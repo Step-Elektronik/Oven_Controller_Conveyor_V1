@@ -1,5 +1,7 @@
+"./Core/Src/Bluetooth_Process.o"
 "./Core/Src/DWIN_Process.o"
 "./Core/Src/EEPROM_Process.o"
+"./Core/Src/Flash_Process.o"
 "./Core/Src/InOut_Process.o"
 "./Core/Src/SEGGER_RTT.o"
 "./Core/Src/SEGGER_RTT_Syscalls_GCC.o"

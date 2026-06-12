@@ -1,5 +1,6 @@
-Core/Src/DWIN_Process.o: ../Core/Src/DWIN_Process.c ../Core/Inc/usart.h \
- ../Core/Inc/main.h ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
+Core/Src/Flash_Process.o: ../Core/Src/Flash_Process.c \
+ ../Core/Inc/Flash_Process.h ../Core/Inc/main.h \
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h \
  ../Core/Inc/stm32f1xx_hal_conf.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h \
@@ -31,14 +32,8 @@ Core/Src/DWIN_Process.o: ../Core/Src/DWIN_Process.c ../Core/Inc/usart.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_spi.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h \
  ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h \
- ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h \
- ../Core/Inc/USART_Process.h ../Core/Inc/usart.h \
- ../Core/Inc/DWIN_Process.h ../Core/Inc/DWIN_Adress.h \
- ../Core/Inc/SEGGER_RTT.h ../Core/Inc/SEGGER_RTT_Conf.h \
- ../Core/Inc/Temperature_Process.h ../Core/Inc/InOut_Process.h \
- ../Core/Inc/rtc.h ../Core/Inc/EEPROM_Process.h ../Core/Inc/hdc1080.h \
- ../Core/Inc/tim.h ../Core/Inc/dac.h ../Core/Inc/version.h
-../Core/Inc/usart.h:
+ ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+../Core/Inc/Flash_Process.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
 ../Core/Inc/stm32f1xx_hal_conf.h:
@@ -73,17 +68,3 @@ Core/Src/DWIN_Process.o: ../Core/Src/DWIN_Process.c ../Core/Inc/usart.h \
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h:
-../Core/Inc/USART_Process.h:
-../Core/Inc/usart.h:
-../Core/Inc/DWIN_Process.h:
-../Core/Inc/DWIN_Adress.h:
-../Core/Inc/SEGGER_RTT.h:
-../Core/Inc/SEGGER_RTT_Conf.h:
-../Core/Inc/Temperature_Process.h:
-../Core/Inc/InOut_Process.h:
-../Core/Inc/rtc.h:
-../Core/Inc/EEPROM_Process.h:
-../Core/Inc/hdc1080.h:
-../Core/Inc/tim.h:
-../Core/Inc/dac.h:
-../Core/Inc/version.h:

@@ -10,6 +10,7 @@
 
 #include "main.h"
 
+#define STM32_OTA_BEGIN_ADR 100
 
 /*---------------------------- SAYFALAR ------------------------------*/
 
@@ -30,6 +31,11 @@
 #define DW_CIHAZ_TEST_PAGE_PSW			9905
 
 #define DW_LOADING_PAGE_ADR				0xF100
+
+#define DW_EKRAN_PROG_CHECK_ADR				0x7995
+
+#define DW_EKRAN_PROG_MASTER_VAL			1
+#define DW_EKRAN_PROG_CONV_VAL				2
 
 /*---------------------------- TEST SAYFASI ------------------------------*/
 
@@ -63,10 +69,8 @@
 
 #define DW_ANA_SAYFA_ENTER				0
 #define DW_MANUEL_MODE_ENTER			1
-#define DW_RECETE_SAYFA_ENTER			2
 #define DW_RECETE_PISIRME_SAYFA_ENTER	3
-#define DW_RECETE_DUZEN_SAYFA_ENTER		4
-#define DW_OTOMATIK_ACMA_SAYFA_ENTER	5
+
 #define DW_CIHAZ_TEST_SAYFA_ENTER		6
 
 /*---------------------------- MANUEL SAYFASI ------------------------------*/
@@ -95,6 +99,13 @@
 /*------------------------------- ANIMSAYON ADDRESS  --------------------------------*/
 #define DW_SICAKLIK_ANIM_ADR			0x1010
 
+/*---------------------------- BLUETOOTH SAYFASI	 ------------------------------*/
+
+#define DW_BLE_NAME_START_ADR			0x17C4
+#define DW_BLE_PSW_START_ADR			0x17DE
+#define DW_QR_CODE_ADR					0x75BB
+#define DW_BLE_IKON_ADR					0x17D0
+
 
 /*---------------------------- ORTAK AYARLAMA SAYFASI	 ------------------------------*/
 
@@ -113,8 +124,14 @@
 
 /*---------------------------- PARAMETRELER SAYFASI	 ------------------------------*/
 
-#define DW_PARAMETRE_PAGE_ADR			0x17A8
+#define BRULOR_RESET_RELAY_DELAY_MS 	2000
 
+#define DW_PARAMETRE_PAGE_ADR			0x17A8
+#define DW_PARAMETRE_EXIT_PAGE_ADR      0x17FA
+
+#define DW_FW_VERSION_ADR				0x68AA
+#define APP_FIRIN_MODEL_ADR				0x2320
+#define DW_PARAMETRE_MK_PSW				9128
 
 #define DW_BUTTON_SOUND_ADR				0x17A9
 #define DW_ALARM_PARAM_ADR				0x17AB
@@ -136,7 +153,8 @@
 
 #define DW_ELEKTRIKLI_FIRIN_TYPE_VAL 	0
 #define DW_LPG_FIRIN_TYPE_VAL 			1
-#define DW_DOGALGAZ_FIRIN_TYPE_VAL 		2
+#define DW_DOGALGAZ_AO_FIRIN_TYPE_VAL 	2
+#define DW_DOGALGAZ_DO_FIRIN_TYPE_VAL 	3
 
 
 /*---------------------------- ARIZA ALARM SAYFASI	 ------------------------------*/
@@ -157,7 +175,7 @@
 #define DW_RECETE_SAYFA_ENTER_ADR		0x2800
 #define DW_RECETE_CIKIS_CMD				0x107F
 #define DW_RECETE_AMOUNT				100
-#define DW_RECETE_ISIM_SIZE				20
+#define DW_RECETE_ISIM_SIZE				10
 #define DW_RECETE_RESIM_ILK_ADR			0x10FB
 #define DW_RECETE_ISIM_ILK_ADR			0x115F
 

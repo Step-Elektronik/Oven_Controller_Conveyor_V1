@@ -1,0 +1,4 @@
+../Core/Src/Flash_Process.c:12:19:Flash_IsAddressValid	24	static
+../Core/Src/Flash_Process.c:25:19:Flash_Erase_Sector	48	static
+../Core/Src/Flash_Process.c:45:19:Flash_Read	32	static
+../Core/Src/Flash_Process.c:68:19:Flash_Write	48	static

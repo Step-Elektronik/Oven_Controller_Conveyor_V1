@@ -28,7 +28,7 @@ uint32_t avgCounter = 0;
 uint16_t vref;
 
 TemperatureData temp;
-//HDC1080 hdcSensor;
+
 TMP112 tmpSensor;
 
 extern uint8_t templog_free;

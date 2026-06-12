@@ -324,19 +324,19 @@ EEPROM_initResponse EEPROM_Recete_DefaultWrite(I2C_HandleTypeDef *hi2c)
 
 	if(registerTable[DW_DIL_PARAM_ADR] == DW_DIL_RUSCA_VAL)
 	{
-		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {0x42,0x46,0x48,0x20,0x49,0x4D,0x46,0x4E,0,0,0,0,0,0,0,0,0,0,0,0};
+		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {0x42,0x46,0x48,0x20,0x49,0x4D,0x46,0x4E,0,0};
 		for(int i=0;i<DW_RECETE_ISIM_SIZE;i++)
 			defaultRecete_isim[i] = isim[i];
 	}
 	else if(registerTable[DW_DIL_PARAM_ADR] != DW_DIL_ALMANCA_VAL)
 	{
-		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {'N','o',' ','N','a','m','e',0,0,0,0,0,0,0,0,0,0,0,0,0};
+		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {'N','o',' ','N','a','m','e',0,0,0};
 		for(int i=0;i<DW_RECETE_ISIM_SIZE;i++)
 			defaultRecete_isim[i] = isim[i];
 	}
 	else
 	{
-		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {0x4B,0x45,0x49,0x4E,0x20,0x4E,0x41,0x4D,0x45,0,0,0,0,0,0,0,0,0,0,0};
+		uint8_t isim[DW_RECETE_ISIM_SIZE] 		= {0x4B,0x45,0x49,0x4E,0x20,0x4E,0x41,0x4D,0x45,0};
 		for(int i=0;i<DW_RECETE_ISIM_SIZE;i++)
 			defaultRecete_isim[i] = isim[i];
 	}
@@ -391,7 +391,7 @@ void EEPROM_Recete_Read(I2C_HandleTypeDef *hi2c)
 			recete_isim_data_u16[j] = combineBytes(recete_isim_data_u8[j*2], recete_isim_data_u8[(j*2)+1]);
 		}
 
-		DWIN_writeRegiser(recete_isim_data_u16, DW_RECETE_ISIM_ILK_ADR + (i*(DW_RECETE_ISIM_SIZE/2)), sizeof(recete_isim_data_u16));
+		DWIN_writeRegiser(recete_isim_data_u16, DW_RECETE_ISIM_ILK_ADR + (i*(DW_RECETE_ISIM_SIZE)), sizeof(recete_isim_data_u16)); // Her seferinde 10 register atlanıyor
 
 		uint8_t recete_resim_data_u8[2];
 		uint16_t recete_resim_data_16;
@@ -403,35 +403,3 @@ void EEPROM_Recete_Read(I2C_HandleTypeDef *hi2c)
 	}
 }
 
-EEPROM_initResponse EEPROM_OtomatikAcma_DefaultWrite(I2C_HandleTypeDef *hi2c)
-{
-
-
-	EEPROM_initResponse response = EE_INIT_OK;
-
-	EEPROM_writeResponse check;
-
-	//uint8_t defaultOtomatik_isim[DW_RECETE_ISIM_SIZE] 				= {'N','o',' ','N','a','m','e',0,0,0,0,0,0,0,0,0,0,0,0,0};
-	uint16_t defaultOtomatik_param[EE_OTOMATIK_ACMA_PARAM_SIZE/2] 	= {6,30,200,200,1,1,0,0}; // Saat, dakika, ust, alt, buhar, manuel/recete, aktif , recete num
-	uint8_t defaultOtomatik_param_u8[EE_OTOMATIK_ACMA_PARAM_SIZE]	= {0};
-
-
-	convert_u16_to_u8(defaultOtomatik_param, defaultOtomatik_param_u8, sizeof(defaultOtomatik_param_u8));
-
-
-	uint8_t defaultOtomatik_allData[sizeof(defaultOtomatik_param_u8) * 7] = {0};
-
-	for(int i=0;i<7;i++)
-	{
-		for(int j=0;j<sizeof(defaultOtomatik_param_u8);j++)
-			defaultOtomatik_allData[j + (i*sizeof(defaultOtomatik_param_u8))] = defaultOtomatik_param_u8[j];
-	}
-
-	check = EEPROM_Write(hi2c, EE_OTOMATIK_ACMA_ILK_ADR, defaultOtomatik_allData, sizeof(defaultOtomatik_allData));
-
-	if(check != EE_WRITE_OK)
-		response = EE_INIT_ERROR;
-
-	return response;
-
-}

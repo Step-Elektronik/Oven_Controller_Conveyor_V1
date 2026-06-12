@@ -14,6 +14,9 @@
 uint32_t outputData = 0;
 extern tickCounter counterTick;
 extern uint16_t registerTable[REGISTER_TABLE_SIZE];
+uint8_t brulor_ariza_resetleme_gormgelme_check = 0;
+uint8_t brulor_ariza_resetleme_gormgelme_cnt = 0;
+
 
 void ShiftRegister_SendData(uint32_t data)
 {
@@ -87,13 +90,19 @@ void I_AC_Check(void) // 1 saniyelik periyot da kontrol edilmeli
 	if((counterTick.input_AC_2 >= 45)&&(CheckBit(Q_BRULOR_RESET) == 0))
 	{
 		if(registerTable[DW_BRULOR_ARIZA_ADR] == 0)
-			DWIN_brulorArizaSet(1);
+		{
+			if(brulor_ariza_resetleme_gormgelme_check == 0)
+			{
+				DWIN_brulorArizaSet(1);
+			}
+		}
 
 		counterTick.input_AC_2 = 0;
 	}
 	else if(registerTable[DW_BRULOR_ARIZA_ADR] == 1)
 	{
-		DWIN_brulorArizaSet(0);
+		//DWIN_brulorArizaSet(0);
+
 		counterTick.input_AC_2 = 0;
 	}
 	else

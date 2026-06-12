@@ -42,6 +42,8 @@
 //#include "sht40.h"
 //#include "hdc1080.h"
 #include "TMP112.h"
+#include "Bluetooth_Process.h"
+#include "Flash_Process.h"
 
 /* USER CODE END Includes */
 
@@ -82,10 +84,49 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern uint16_t registerTable[9000];
+extern uint16_t registerTable[REGISTER_TABLE_SIZE];
+
+
+uint32_t BytesToUint32(const uint8_t *buf)
+{
+    return  ((uint32_t)buf[0])        |
+           (((uint32_t)buf[1]) << 8)  |
+           (((uint32_t)buf[2]) << 16) |
+           (((uint32_t)buf[3]) << 24);
+}
 
 
 
+uint32_t safeProgramWait_tick = 0;
+uint32_t safeProgramWait_flag = 0;
+
+void safeProgram_Declaration(void)
+{
+	if(safeProgramWait_flag == 0)
+	{
+		if((safeProgramWait_tick - HAL_GetTick()) > SAFE_PROGRAM_DECL_WAIT)
+		{
+			safeProgramWait_flag = 1;
+
+			uint8_t flash_info_read[4] = {0};
+
+			if(Flash_Read(FLASH_INFO_ADDR, flash_info_read, sizeof(flash_info_read)) != HAL_OK)
+			{
+				SEGGER_RTT_printf(0,"safeProgram_Declaration() -> Flash_Read Error \r\n");
+				return;
+			}
+
+			flash_info_read[0] = 0;	// Maximum hatalı program sayacı sıfırlanıyor
+
+			if(Flash_Erase_Sector(FLASH_INFO_SECTOR) != HAL_OK)
+				return;
+
+			uint32_t flash_info_data_u32 = BytesToUint32(flash_info_read);
+			Flash_Write(FLASH_INFO_ADDR, &flash_info_data_u32, sizeof(flash_info_data_u32)/4);
+
+		}
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -170,11 +211,12 @@ int main(void)
 		  Error_Handler();
 	  }
 
-//	  if(ESP32_SetUsartChannel(&huart1, USART1, &hdma_usart1_rx) != HAL_OK)
-//	  {
-//		  SEGGER_RTT_printf(0,"ESP32 Set Usart Channel Error ! \r\n");
-//		  Error_Handler();
-//	  }
+	  if(ESP32_SetUsartChannel(&huart1, USART1, &hdma_usart1_rx) != HAL_OK)
+	  {
+		  SEGGER_RTT_printf(0,"ESP32 Set Usart Channel Error ! \r\n");
+		  Error_Handler();
+	  }
+
 
 	  if(TMP112_Init(&tmpSensor, &hi2c1) == HAL_OK)
 	  {
@@ -227,7 +269,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  DWIN_run();
-	  //Bluetooth_run();
+	  Bluetooth_run();
+	  safeProgram_Declaration();
 	  //Test
 
   }

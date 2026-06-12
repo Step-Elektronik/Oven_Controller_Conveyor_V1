@@ -16,11 +16,11 @@
 #define TIMEOUT_MS 10
 #define MAX_ATTEMPT 3
 
-#define VERSION_ADDR 	0x000F
+#define DWIN_VERSION_ADDR 	0x000F
 #define READ_CMD 		0x83
 #define WRITE_CMD		0x82
 
-#define REGISTER_TABLE_SIZE   9000
+#define REGISTER_TABLE_SIZE   13000
 
 typedef enum
 {
@@ -48,6 +48,7 @@ typedef struct{
     uint32_t shiftRefreshWait;
     uint32_t input_AC_2;
     uint32_t brulorResetRelay;
+    uint32_t brulorResetRelayDelay;
 }tickCounter;
 
 
@@ -104,5 +105,6 @@ void DWIN_changeKeyboard(uint16_t dil);
 void DWIN_testSayfa(void);
 void DWIN_isitmaProcess(void);
 void DWIN_sogutmaProcess(void);
+
 
 #endif /* INC_DWIN_PROCESS_H_ */

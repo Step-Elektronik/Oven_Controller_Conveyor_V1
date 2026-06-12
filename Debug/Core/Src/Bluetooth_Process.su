@@ -1,0 +1,15 @@
+../Drivers/CMSIS/Include/core_cm3.h:1762:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../Core/Src/Bluetooth_Process.c:79:6:hexToString	32	static
+../Core/Src/Bluetooth_Process.c:93:19:ESP32_SetUsartChannel	32	static
+../Core/Src/Bluetooth_Process.c:113:6:ESP32_receiveDataProcess	72	static
+../Core/Src/Bluetooth_Process.c:429:6:Bluetooth_Check	16	static
+../Core/Src/Bluetooth_Process.c:485:6:STM32_RequestReadyCounter	4	static
+../Core/Src/Bluetooth_Process.c:499:6:STM32_RequestBufferWrite	24	static
+../Core/Src/Bluetooth_Process.c:516:6:STM32_RequestCheck_Process	8	static
+../Core/Src/Bluetooth_Process.c:543:16:ESP32_receiveDataCheck	24	static
+../Core/Src/Bluetooth_Process.c:631:16:ESP32_writeRegister	32	static
+../Core/Src/Bluetooth_Process.c:692:6:Bluetooth_writeRegister	16	static
+../Core/Src/Bluetooth_Process.c:707:6:Bluetooth_dwinWrite	160	static
+../Core/Src/Bluetooth_Process.c:1198:6:Bluetooth_run	8	static
+../Core/Src/Bluetooth_Process.c:1204:6:set_bootloader_request_flag	4	static
+../Core/Src/Bluetooth_Process.c:1218:6:Jump_To_Bootloader	8	static

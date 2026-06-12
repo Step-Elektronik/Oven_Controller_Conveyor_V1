@@ -57,7 +57,8 @@ Oven_Controller_Conveyor_V1.hex \
 
 
 # All Target
-all: main-build
+all:
+	+@$(MAKE) --no-print-directory main-build && $(MAKE) --no-print-directory post-build
 
 # Main-build Target
 main-build: Oven_Controller_Conveyor_V1.elf secondary-outputs
@@ -88,6 +89,17 @@ clean:
 	-$(RM) Oven_Controller_Conveyor_V1.elf Oven_Controller_Conveyor_V1.hex Oven_Controller_Conveyor_V1.list Oven_Controller_Conveyor_V1.map default.size.stdout
 	-@echo ' '
 
+post-build:
+	rm -f "Oven_Controller_Conveyor_V1"*.bin
+	rm -f "../Oven_Controller_Conveyor_V1"*.bin
+	rm -f "Oven_Controller_Conveyor_V1"*.hex
+	rm -f "../Oven_Controller_Conveyor_V1"*.hex
+	arm-none-eabi-objcopy -O binary "Oven_Controller_Conveyor_V1.elf" "Oven_Controller_Conveyor_V1.bin"
+	arm-none-eabi-objcopy -O ihex "Oven_Controller_Conveyor_V1.elf" "Oven_Controller_Conveyor_V1.hex"
+	cp "Oven_Controller_Conveyor_V1.bin" "../Oven_Controller_Conveyor_V1_$$(awk '/FW_VERSION/ {print $$3}' "C:/Users/Step/Documents/GitHub/Oven_Controller_Conveyor_V1/Core/Inc/version.h" | tr -d '\r\n').bin"
+	cp "Oven_Controller_Conveyor_V1.hex" "../Oven_Controller_Conveyor_V1_$$(awk '/FW_VERSION/ {print $$3}' "C:/Users/Step/Documents/GitHub/Oven_Controller_Conveyor_V1/Core/Inc/version.h" | tr -d '\r\n').hex"
+	-@echo ' '
+
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
 
 fail-specified-linker-script-missing:
@@ -97,6 +109,6 @@ fail-specified-linker-script-missing:
 warn-no-linker-script-specified:
 	@echo 'Warning: No linker script specified. Check the linker settings in the build configuration.'
 
-.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified
+.PHONY: all clean dependents main-build fail-specified-linker-script-missing warn-no-linker-script-specified post-build
 
 -include ../makefile.targets

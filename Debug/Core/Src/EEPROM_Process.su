@@ -3,6 +3,5 @@
 ../Core/Src/EEPROM_Process.c:168:6:EEPROM_Read	40	static
 ../Core/Src/EEPROM_Process.c:190:19:EEPROM_Read_Safe	32	static
 ../Core/Src/EEPROM_Process.c:220:21:EEPROM_init	48	static
-../Core/Src/EEPROM_Process.c:317:21:EEPROM_Recete_DefaultWrite	2984	static
-../Core/Src/EEPROM_Process.c:380:6:EEPROM_Recete_Read	72	static
-../Core/Src/EEPROM_Process.c:406:21:EEPROM_OtomatikAcma_DefaultWrite	184	static
+../Core/Src/EEPROM_Process.c:317:21:EEPROM_Recete_DefaultWrite	1928	static
+../Core/Src/EEPROM_Process.c:380:6:EEPROM_Recete_Read	56	static

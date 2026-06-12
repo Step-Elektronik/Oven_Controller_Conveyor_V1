@@ -1,3 +1,5 @@
-../Core/Src/main.c:96:5:main	7
-../Core/Src/main.c:241:6:SystemClock_Config	4
-../Core/Src/main.c:299:6:Error_Handler	1
+../Core/Src/main.c:90:10:BytesToUint32	1
+../Core/Src/main.c:103:6:safeProgram_Declaration	5
+../Core/Src/main.c:137:5:main	8
+../Core/Src/main.c:284:6:SystemClock_Config	4
+../Core/Src/main.c:342:6:Error_Handler	1
