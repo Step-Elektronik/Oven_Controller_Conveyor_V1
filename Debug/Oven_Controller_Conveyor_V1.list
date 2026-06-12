@@ -5838,7 +5838,7 @@ void set_FWversion(void)
  800824a:	2301      	movs	r3, #1
  800824c:	83fb      	strh	r3, [r7, #30]
     uint16_t minor = FW_VERSION % 100;
- 800824e:	2306      	movs	r3, #6
+ 800824e:	2307      	movs	r3, #7
  8008250:	83bb      	strh	r3, [r7, #28]
 
     sprintf((char*)version, "VER %d.%02d", major, minor);
@@ -5864,14 +5864,14 @@ void set_FWversion(void)
 
     registerTable[DW_FW_VERSION_ADR] = FW_VERSION;
  8008278:	4b09      	ldr	r3, [pc, #36]	@ (80082a0 <set_FWversion+0x68>)
- 800827a:	f503 4350 	add.w	r3, r3, #53248	@ 0xd000
- 800827e:	226a      	movs	r2, #106	@ 0x6a
- 8008280:	f8a3 2154 	strh.w	r2, [r3, #340]	@ 0x154
+ 800827a:	f503 5300 	add.w	r3, r3, #8192	@ 0x2000
+ 800827e:	226b      	movs	r2, #107	@ 0x6b
+ 8008280:	f8a3 2fc0 	strh.w	r2, [r3, #4032]	@ 0xfc0
 
     DWIN_writeRegiser(version_u16, DW_FW_VERSION_ADR, sizeof(version_u16));
  8008284:	1d3b      	adds	r3, r7, #4
  8008286:	220a      	movs	r2, #10
- 8008288:	f646 01aa 	movw	r1, #26794	@ 0x68aa
+ 8008288:	f44f 51bf 	mov.w	r1, #6112	@ 0x17e0
  800828c:	4618      	mov	r0, r3
  800828e:	f001 f92d 	bl	80094ec <DWIN_writeRegiser>
 }
