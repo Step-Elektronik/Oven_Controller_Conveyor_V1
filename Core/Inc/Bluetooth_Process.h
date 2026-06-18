@@ -60,5 +60,7 @@ void STM32_RequestCheck_Process(void);
 void STM32_RequestBufferWrite(uint16_t* pBuffer, uint16_t addr, uint8_t len);
 void STM32_RequestReadyCounter(void);
 void otomatikAcmaWriteProcess(void);
+void BLE_receteDuzenlemeProcess(void);
+
 
 #endif /* INC_BLUETOOTH_PROCESS_H_ */

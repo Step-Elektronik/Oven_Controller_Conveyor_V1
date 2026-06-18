@@ -195,6 +195,11 @@
 #define DW_RECETE_DUZENLEME_CMD			2
 
 
+#define APP_RECETE_PISIRME_START_ADR	0x2327
+#define APP_RECETE_ILK_ADR				0x2328
+#define APP_RECETE_LENGTH				9
+
+
 /*--------------------------------- TARIH/SAAT -----------------------------------*/
 #define DW_TARIH_SAAT_PAGE_ENTER_ADR	0x2500
 #define DW_FIRST_WRITE_RTC_ADR			0x009C

@@ -381,25 +381,23 @@ void EEPROM_Recete_Read(I2C_HandleTypeDef *hi2c)
 {
 	for(int i=0;i<DW_RECETE_AMOUNT;i++)
 	{
-		uint8_t recete_isim_data_u8[DW_RECETE_ISIM_SIZE];
-		EEPROM_Read_Safe(hi2c, EE_RECETE_ILK_ADR + EE_RECETE_ISIM_ROW +(i*(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)), recete_isim_data_u8, sizeof(recete_isim_data_u8));
+		uint8_t recete_all_data_u8[EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE] = {0};
+		EEPROM_Read_Safe(hi2c, EE_RECETE_ILK_ADR + (i*(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)), recete_all_data_u8, sizeof(recete_all_data_u8));
 
-		uint16_t recete_isim_data_u16[DW_RECETE_ISIM_SIZE/2];
+		uint16_t receteResmi =	combineBytes(recete_all_data_u8[0], recete_all_data_u8[1]);
+		uint16_t receteAdi[DW_RECETE_ISIM_SIZE/2];
 
-		for(int j=0;j<DW_RECETE_ISIM_SIZE/2;j++)
-		{
-			recete_isim_data_u16[j] = combineBytes(recete_isim_data_u8[j*2], recete_isim_data_u8[(j*2)+1]);
-		}
+		DWIN_writeRegiser(&receteResmi, DW_RECETE_RESIM_ILK_ADR + i, sizeof(receteResmi));
 
-		DWIN_writeRegiser(recete_isim_data_u16, DW_RECETE_ISIM_ILK_ADR + (i*(DW_RECETE_ISIM_SIZE)), sizeof(recete_isim_data_u16)); // Her seferinde 10 register atlanıyor
+		for(int i=0;i<(DW_RECETE_ISIM_SIZE/2);i++)
+			receteAdi[i] = combineBytes(recete_all_data_u8[EE_RECETE_DATA_SIZE + (i*2)], recete_all_data_u8[EE_RECETE_DATA_SIZE + (i*2) + 1]);
 
-		uint8_t recete_resim_data_u8[2];
-		uint16_t recete_resim_data_16;
+		DWIN_writeRegiser(receteAdi, DW_RECETE_ISIM_ILK_ADR + (i*(DW_RECETE_ISIM_SIZE)), sizeof(receteAdi)); // Her seferinde 10 register atlanıyor
 
-		EEPROM_Read_Safe(hi2c, EE_RECETE_ILK_ADR +  (i*(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)), recete_resim_data_u8, sizeof(recete_resim_data_u8));
-		recete_resim_data_16 = combineBytes(recete_resim_data_u8[0], recete_resim_data_u8[1]);
 
-		DWIN_writeRegiser(&recete_resim_data_16, DW_RECETE_RESIM_ILK_ADR + i, sizeof(recete_resim_data_16));
+		for(int j=0;j<(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)/2;j++)
+			registerTable[(APP_RECETE_ILK_ADR + j) + (i*(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)/2)] = combineBytes(recete_all_data_u8[(j*2)], recete_all_data_u8[(j*2) + 1]);
+
 	}
 }
 

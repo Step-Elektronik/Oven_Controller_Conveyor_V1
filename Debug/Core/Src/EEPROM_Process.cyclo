@@ -4,4 +4,4 @@
 ../Core/Src/EEPROM_Process.c:190:19:EEPROM_Read_Safe	5
 ../Core/Src/EEPROM_Process.c:220:21:EEPROM_init	7
 ../Core/Src/EEPROM_Process.c:317:21:EEPROM_Recete_DefaultWrite	11
-../Core/Src/EEPROM_Process.c:380:6:EEPROM_Recete_Read	3
+../Core/Src/EEPROM_Process.c:380:6:EEPROM_Recete_Read	4

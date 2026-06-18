@@ -37,7 +37,8 @@ Core/Src/DWIN_Process.o: ../Core/Src/DWIN_Process.c ../Core/Inc/usart.h \
  ../Core/Inc/SEGGER_RTT.h ../Core/Inc/SEGGER_RTT_Conf.h \
  ../Core/Inc/Temperature_Process.h ../Core/Inc/InOut_Process.h \
  ../Core/Inc/rtc.h ../Core/Inc/EEPROM_Process.h ../Core/Inc/hdc1080.h \
- ../Core/Inc/tim.h ../Core/Inc/dac.h ../Core/Inc/version.h
+ ../Core/Inc/tim.h ../Core/Inc/dac.h ../Core/Inc/version.h \
+ ../Core/Inc/Bluetooth_Process.h
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h:
@@ -87,3 +88,4 @@ Core/Src/DWIN_Process.o: ../Core/Src/DWIN_Process.c ../Core/Inc/usart.h \
 ../Core/Inc/tim.h:
 ../Core/Inc/dac.h:
 ../Core/Inc/version.h:
+../Core/Inc/Bluetooth_Process.h:

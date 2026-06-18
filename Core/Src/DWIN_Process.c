@@ -20,6 +20,7 @@
 #include "dac.h"
 #include "version.h"
 #include "stdio.h"
+#include "Bluetooth_Process.h"
 
 extern TemperatureData temp;
 extern uint8_t DWIN_rxBuffer[DWIN_rxBufferSize];
@@ -34,6 +35,8 @@ extern I2C_HandleTypeDef hi2c1;
 extern usartInfo DWIN;
 
 extern uint16_t eepromAddrTable[EEPROM_TABLE_LEN];
+
+extern EEPROM_initResponse eepromStatus;
 
 extern uint8_t rxBusyFlag;
 
@@ -1133,6 +1136,20 @@ void DWIN_check(void)
 
 				DWIN.Init = 1;
 
+				if(eepromStatus == EE_INIT_ERROR)
+				{
+					registerTable[DW_EEPROM_ARIZA_ADR] = 1;
+					uint16_t data = 1;
+					DWIN_writeRegiser(&data, DW_EEPROM_ARIZA_ADR, sizeof(data));
+					STM32_RequestBufferWrite(&data, DW_EEPROM_ARIZA_ADR, sizeof(data));
+
+					registerTable[DW_ARIZA_PAGE_NUM] = 1;
+					DWIN_changePage(DW_ARIZA_PAGE_NUM);
+
+					DwinAlarmFlag = 1;
+					alarmBuzzerPeriod = 200;
+				}
+
 			}
 
 			else
@@ -1989,6 +2006,11 @@ void DWIN_receteSayfa(void)
 				Recete_data2_u8[0] = recete_resim[0];
 				Recete_data2_u8[1] = recete_resim[1];
 
+
+				for(int j=0;j<(EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)/2;j++)
+					registerTable[APP_RECETE_ILK_ADR + ((recete_num - 1)*((EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)/2)) + j] = combineBytes(Recete_data2_u8[(j*2)], Recete_data2_u8[(j*2) + 1]);
+
+
 				convert_u8_to_u16(recete_isim, recete_isim_u16, sizeof(recete_isim));
 				DWIN_writeRegiser(recete_isim_u16, DW_RECETE_ISIM_ILK_ADR + ((recete_num-1)*(DW_RECETE_ISIM_SIZE)), sizeof(recete_isim_u16));
 
@@ -2125,6 +2147,8 @@ void DWIN_brulorArizaSet(uint8_t state)
 	writeData2 = (uint16_t)state;
 	DWIN_writeRegiser(&writeData2, DW_BRULOR_ARIZA_ADR, sizeof(writeData2));
 
+	STM32_RequestBufferWrite(&writeData2, DW_BRULOR_ARIZA_ADR, sizeof(writeData2));
+
 	registerTable[DW_BRULOR_ARIZA_ADR] = state;
 
 }
@@ -2168,6 +2192,7 @@ void DWIN_arızaCheck(void)
 		registerTable[DW_TC3_ARIZA_ADR] = 1;
 		uint16_t data = 1;
 		DWIN_writeRegiser(&data, DW_TC3_ARIZA_ADR, sizeof(data));
+		STM32_RequestBufferWrite(&data, DW_TC3_ARIZA_ADR, sizeof(data));
 	}
 
 //	if((temp.TC3 < 600) && (registerTable[DW_TC3_ARIZA_ADR] != 0))
@@ -2182,6 +2207,7 @@ void DWIN_arızaCheck(void)
 		registerTable[DW_ASIRI_SICAKLIK_ARIZA_ADR] = 1;
 		uint16_t data = 1;
 		DWIN_writeRegiser(&data, DW_ASIRI_SICAKLIK_ARIZA_ADR, sizeof(data));
+		STM32_RequestBufferWrite(&data, DW_ASIRI_SICAKLIK_ARIZA_ADR, sizeof(data));
 	}
 //	if((HAL_GPIO_ReadPin(I_ASIRI_SICAKLIK) == 1)&&(registerTable[DW_ASIRI_SICAKLIK_ARIZA_ADR] != 0))
 //	{
@@ -2195,6 +2221,7 @@ void DWIN_arızaCheck(void)
 		registerTable[DW_MOTOR_ASIRI_SICAKLIK_ARIZA_ADR] = 1;
 		uint16_t data = 1;
 		DWIN_writeRegiser(&data, DW_MOTOR_ASIRI_SICAKLIK_ARIZA_ADR, sizeof(data));
+		STM32_RequestBufferWrite(&data, DW_MOTOR_ASIRI_SICAKLIK_ARIZA_ADR, sizeof(data));
 	}
 //	if((HAL_GPIO_ReadPin(I_MOTOR_ASIRI_SICAKLIK) == 1)&&(registerTable[DW_MOTOR_ASIRI_SICAKLIK_ARIZA_ADR] != 0))
 //	{
@@ -2334,19 +2361,21 @@ void DWIN_readRTC(uint8_t* saniye, uint8_t* dakika, uint8_t* saat, uint8_t* haft
 
 void PWM_SetFreqAndDuty(uint32_t freq_hz, uint8_t duty_percent)
 {
-    uint32_t timer_clk = HAL_RCC_GetPCLK2Freq();
+    if (freq_hz == 0 || duty_percent == 0)
+    {
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 0);
+        return;
+    }
 
-    uint32_t arr = 0;
+    uint32_t timer_clk = HAL_RCC_GetPCLK2Freq();
 
     if ((RCC->CFGR & RCC_CFGR_PPRE2) != RCC_CFGR_PPRE2_DIV1)
         timer_clk *= 2;
 
-    uint32_t prescaler = htim1.Init.Prescaler + 1;
-
-    if(freq_hz != 0)
-    	arr = (timer_clk / (prescaler * freq_hz)) - 1;
-
-    uint32_t ccr = ((arr + 1) * duty_percent) / 100;
+    uint32_t prescaler    = htim1.Init.Prescaler + 1;
+    uint32_t arr          = (timer_clk / (prescaler * freq_hz)) - 1;
+    uint8_t  duty_clamped = (duty_percent > 100) ? 100 : duty_percent;
+    uint32_t ccr          = ((arr + 1) * duty_clamped) / 100;
 
     __HAL_TIM_SET_AUTORELOAD(&htim1, arr);
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, ccr);

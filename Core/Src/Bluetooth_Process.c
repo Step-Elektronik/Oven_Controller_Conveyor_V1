@@ -37,18 +37,9 @@ extern TemperatureData temp;
 extern uint8_t ESP32_rxBuffer[ESP32_RX_BUFFER_SIZE];
 extern uint8_t main_ESP32_rxBuffer[ESP32_RX_BUFFER_SIZE];
 extern uint16_t registerTable[REGISTER_TABLE_SIZE];
-
-extern uint16_t pisirmeManuelDownCounter;
-extern uint16_t buharManuelDownCounter;
-extern uint8_t pisirmeSonuAlarmFlag;
-extern uint8_t pisirmeSonuAlarmBuzzer;
-
-extern uint8_t ustOnTurbo 		;
-extern uint8_t ustArkaTurbo 	;
-extern uint8_t altTurbo			;
-
-extern uint16_t islemdekiReceteAdim;
 extern uint16_t islemdekiRecete;
+
+
 
 extern uint32_t conveyor_freq;
 extern uint8_t  pid_active;
@@ -70,7 +61,6 @@ uint16_t stm32RequestAddr 		= 0;
 uint8_t stm32RequestLength 		= 0;
 uint32_t stm32RequestPeriodTick = 0;
 
-uint8_t otomatikAcmaWriteCheck = 0;
 uint16_t receteDuzenlemeAdr = 0;
 
 void Furnace_Init(void);
@@ -702,6 +692,49 @@ void Bluetooth_writeRegister(void)
 		memset(ESP32_writeData,0,sizeof(ESP32_writeData));
 	}
 
+	if(receteDuzenlemeAdr > 0)
+	{
+		if((((receteDuzenlemeAdr - APP_RECETE_ILK_ADR) + 1) % APP_RECETE_LENGTH) == 0)
+			BLE_receteDuzenlemeProcess();
+		else
+			SEGGER_RTT_printf(0,"Bluetooth_writeRegister -> ReceteDuzenleme WRONG ADR! adr : %d\r\n",receteDuzenlemeAdr);
+
+		receteDuzenlemeAdr = 0;
+	}
+
+}
+
+void BLE_receteDuzenlemeProcess(void)
+{
+	uint8_t receteNum = ((receteDuzenlemeAdr - APP_RECETE_ILK_ADR) + 1) / APP_RECETE_LENGTH;
+
+	uint16_t receteParamData_u16[(EE_RECETE_DATA_SIZE / 2) + (DW_RECETE_ISIM_SIZE / 2)] = {0};
+	uint8_t receteParamData_u8[EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE] = {0};
+
+	for(int i=0;i<((EE_RECETE_DATA_SIZE / 2) + (DW_RECETE_ISIM_SIZE / 2));i++)
+		receteParamData_u16[i] = registerTable[APP_RECETE_ILK_ADR + ((receteNum - 1) * APP_RECETE_LENGTH) + i];
+
+	convert_u16_to_u8(receteParamData_u16, receteParamData_u8, sizeof(receteParamData_u16));
+
+	if(EEPROM_Write(&hi2c1, EE_RECETE_ILK_ADR + ((receteNum - 1) * (EE_RECETE_DATA_SIZE + DW_RECETE_ISIM_SIZE)), receteParamData_u8, sizeof(receteParamData_u8)) != EE_WRITE_OK)
+		SEGGER_RTT_printf(0,"BLE_receteDuzenlemeProcess -> EEPROM_Write ERR! \r\n");
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	uint16_t recete_isim_data_u16[DW_RECETE_ISIM_SIZE/2] = {0};
+
+	for(int i=0;i<(DW_RECETE_ISIM_SIZE/2);i++)
+		recete_isim_data_u16[i] = registerTable[APP_RECETE_ILK_ADR + ((receteNum - 1) * APP_RECETE_LENGTH) + (EE_RECETE_DATA_SIZE/2) + i];
+
+	DWIN_writeRegiser(recete_isim_data_u16, DW_RECETE_ISIM_ILK_ADR + ((receteNum - 1)*(DW_RECETE_ISIM_SIZE)), sizeof(recete_isim_data_u16)); // Her seferinde 10 register atlanıyor
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	uint16_t recete_resim_data_u16 = registerTable[APP_RECETE_ILK_ADR + ((receteNum - 1) * APP_RECETE_LENGTH)];
+
+	DWIN_writeRegiser(&recete_resim_data_u16, DW_RECETE_RESIM_ILK_ADR + (receteNum - 1), sizeof(recete_resim_data_u16));
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void Bluetooth_dwinWrite(uint16_t addr, uint16_t value)
@@ -724,6 +757,8 @@ void Bluetooth_dwinWrite(uint16_t addr, uint16_t value)
 
 				DWIN_resetManuelPisirme();
 
+				DWIN_changePage(0);
+
 			}
 
 
@@ -732,6 +767,8 @@ void Bluetooth_dwinWrite(uint16_t addr, uint16_t value)
 				registerTable[REG_DW_MODE_INFO_ADR] = DW_MANUEL_MODE_ENTER;
 
 				setOut(Q_SOGUTMA_FANI, data);
+
+				DWIN_changePage(DW_PISIRME_PAGE_NUM);
 
 			}
 
@@ -1130,6 +1167,45 @@ void Bluetooth_dwinWrite(uint16_t addr, uint16_t value)
 
 		break;
 
+		case APP_RECETE_PISIRME_START_ADR:
+
+			if((data>0)&&(data <= DW_RECETE_AMOUNT))
+			{
+				uint16_t recete_num = data;
+
+				islemdekiRecete = DW_RECETE_ILK_ADR + (recete_num - 1);
+
+				uint16_t receteResmi		= 	registerTable[APP_RECETE_ILK_ADR + ((recete_num - 1)*APP_RECETE_LENGTH)];
+
+				DWIN_writeRegiser(&recete_num, DW_RECETE_DUZ_NUM_ADR, sizeof(recete_num));
+				DWIN_writeRegiser(&receteResmi, DW_RECETE_DUZ_RESIM_ADR, sizeof(receteResmi));
+
+				uint16_t receteAdi[DW_RECETE_ISIM_SIZE/2];
+
+				for(int i=0;i<DW_RECETE_ISIM_SIZE/2;i++)
+					receteAdi[i] = registerTable[APP_RECETE_ILK_ADR + ((recete_num - 1)*APP_RECETE_LENGTH) + (EE_RECETE_DATA_SIZE/2) + i];
+
+				DWIN_writeRegiser(receteAdi, DW_RECETE_DUZ_ISIM_ADR, sizeof(receteAdi));
+
+				registerTable[APP_RECETE_PISIRME_START_ADR] = recete_num;
+				registerTable[REG_DW_MODE_INFO_ADR] = DW_RECETE_PISIRME_SAYFA_ENTER;
+
+				for(int i=0;i<((EE_RECETE_DATA_SIZE/2) - 1);i++)
+				{
+					uint16_t recete_pisirme_param = registerTable[APP_RECETE_ILK_ADR + ((recete_num - 1)*APP_RECETE_LENGTH) + i + 1];
+					DWIN_writeRegiser(&recete_pisirme_param, DW_RECETE_PISIR_UST_SIC_SET_ADR + (i*2), sizeof(recete_pisirme_param));
+
+					registerTable[DW_RECETE_PISIR_UST_SIC_SET_ADR + (i*2)] = recete_pisirme_param;
+				}
+
+				conveyor_freq = calculate_frequency((registerTable[DW_PISIRME_SURESI_DK_ADR]*60) + registerTable[DW_PISIRME_SURESI_SN_ADR]);
+
+				setOut(Q_SOGUTMA_FANI, 1);
+				DWIN_changePage(DW_RECETE_PISIRME_PAGE_NUM);
+			}
+
+		break;
+
 
 		case DW_FARBRIKA_AYAR_PARAM_ADR:
 
@@ -1192,6 +1268,9 @@ void Bluetooth_dwinWrite(uint16_t addr, uint16_t value)
 			registerTable[addr] = data;
 		break;
 	}
+
+	if((addr >= APP_RECETE_ILK_ADR) && (addr < (APP_RECETE_ILK_ADR + (APP_RECETE_LENGTH*100))))
+		receteDuzenlemeAdr = addr;
 
 }
 
