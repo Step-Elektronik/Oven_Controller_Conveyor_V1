@@ -31,6 +31,7 @@
 #include "DWIN_Process.h"
 #include "string.h"
 #include "InOut_Process.h"
+#include "Bluetooth_Process.h"
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -209,7 +210,7 @@ void SysTick_Handler(void)
   avgAdcProcess();
   PWM_SmoothTask_1ms();
   manual_pwm_update();
-
+  STM32_RequestReadyCounter();
   if(counterTick.buharHazir < 100)
 	  counterTick.buharHazir++;
   /* USER CODE END SysTick_IRQn 1 */
