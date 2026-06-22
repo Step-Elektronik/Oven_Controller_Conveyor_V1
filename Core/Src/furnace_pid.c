@@ -311,7 +311,14 @@ void type1_oven_heating_process(void)
 	if(temp.TC3<(registerTable[DW_UST_SICAKLIK_SET_ADR] - 6))
 	{
 
-		pid_output = 100;//(uint16_t)type1_outputCalculate(registerTable[DW_UST_SICAKLIK_SET_ADR]);//100
+		if(registerTable[DW_UST_SICAKLIK_SET_ADR] <= 300)
+		{
+			pid_output = 85;
+		}
+		else
+		{
+			pid_output = 100;//(uint16_t)type1_outputCalculate(registerTable[DW_UST_SICAKLIK_SET_ADR]);//100
+		}
 
 		tick_counter = 0;
 		furnacePID.OutputSum = 0;

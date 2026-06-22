@@ -134,7 +134,9 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-
+	SEGGER_RTT_printf(0,"BusFault_Handler !!! \r\n");
+	//HAL_Delay(0);
+	NVIC_SystemReset();
   /* USER CODE END BusFault_IRQn 0 */
   while (1)
   {
@@ -149,7 +151,9 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
-
+	SEGGER_RTT_printf(0,"UsageFault_Handler !!! \r\n");
+	//HAL_Delay(0);
+	NVIC_SystemReset();
   /* USER CODE END UsageFault_IRQn 0 */
   while (1)
   {

@@ -4,6 +4,6 @@
 ../Core/Src/furnace_pid.c:248:6:manual_pwm_update	6
 ../Core/Src/furnace_pid.c:267:7:CalculateSoftThreshold	4
 ../Core/Src/furnace_pid.c:295:8:type1_outputCalculate	3
-../Core/Src/furnace_pid.c:309:6:type1_oven_heating_process	4
-../Core/Src/furnace_pid.c:341:8:type2_outputCalculate	3
-../Core/Src/furnace_pid.c:355:6:type2_oven_heating_process	4
+../Core/Src/furnace_pid.c:309:6:type1_oven_heating_process	5
+../Core/Src/furnace_pid.c:348:8:type2_outputCalculate	3
+../Core/Src/furnace_pid.c:362:6:type2_oven_heating_process	4
